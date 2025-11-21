@@ -7,7 +7,7 @@ from typing import List, Tuple
 def compute_tile_grid(width: int, height: int, tile_size: int, overlap: int = 0) -> List[Tuple[int, int, int, int]]:
     """
     Return a list of tiles defined as (x, y, w, h).
-    This is a simple grid; in a real version you'd align with actual WSI dims.
+    This is a simple grid; in a real version we'd align with actual WSI dims.
     """
     tiles = []
     y = 0
