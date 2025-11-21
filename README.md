@@ -284,7 +284,8 @@ The UI shows:
 - tissue mask overlay
 
 - tissue mask binary PNG
-<img width="1842" height="895" alt="image" src="https://github.com/user-attachments/assets/03a68c27-4a82-43c2-b695-bf4e0b0121f5" />
+<img width="1836" height="477" alt="image" src="https://github.com/user-attachments/assets/ba86d247-cbca-4af8-97ba-ccebf6350b5b" />
+
 
 
 ## How to Scale to 10× More Jobs / Users
