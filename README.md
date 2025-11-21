@@ -121,7 +121,16 @@ In this example, we submit a workflow consisting of two jobs on a single branch:
 
 Both jobs operate on the same whole-slide image, allowing you to confirm that the scheduler processes dependent tasks correctly and that result files are created inside: `outputs/<job_id>/`
 
+**First start the Server**
+<img width="515" height="142" alt="image" src="https://github.com/user-attachments/assets/eb84f7f6-5150-46ea-b24a-5e711be78195" />
+
+Expected output:
+```
+Uvicorn running on http://127.0.0.1:8000
+
+```
 To submit a workflow, navigate to: `http://localhost:8000/docs`
+<img width="1892" height="967" alt="image" src="https://github.com/user-attachments/assets/8020c475-e1ac-4573-bb1f-07a5fc14c457" />
 
 Use this example JSON for **POST /workflows/**:
 ```
@@ -159,6 +168,7 @@ Required header:
 ```
 X-User-ID: user-1
 ```
+<img width="1638" height="980" alt="image" src="https://github.com/user-attachments/assets/ac9ddc3a-cc2d-44af-8b9d-ba5145c517e9" />
 
 Your terminal will show logs like:
 ```
@@ -167,7 +177,22 @@ running_jobs: {...}
 active_users: {...}
 Candidates: [...]
 ```
+<img width="1276" height="230" alt="image" src="https://github.com/user-attachments/assets/4f548d6f-3a5a-46b5-95e4-581f3974535d" />
 
+Retreive job ID and workflow ID
+```
+{
+  "id": "2cad6352-085f-4d40-af00-dd4f2dee6026",
+  "name": "test-wsi",
+  "user_id": "user-1",
+  "created_at": "2025-11-21T18:35:00.147118",
+  "job_ids": [
+    "23eabec6-7fa4-4ab0-9ca7-b87bb7e39b31",
+    "d47d4959-8884-4a76-80fb-285b6d42abad"
+  ],
+  "overall_progress": 0
+}
+```
 You can view workflow jobs:
 
 `GET /workflows/<workflow_id>`
@@ -238,6 +263,7 @@ http://localhost:8000/outputs/<job_id>/tissue_mask.png
 **To View Results in the Frontend**
 Open the UI: `http://localhost:8000/`
 
+
 Enter both job IDs:
 
 - Cell segmentation job ID
@@ -245,6 +271,7 @@ Enter both job IDs:
 - Tissue mask job ID
 
 - Click Load Results.
+<img width="1836" height="921" alt="image" src="https://github.com/user-attachments/assets/3785f4dc-4172-4e1c-becc-fb8cf7141a4a" />
 
 The UI shows:
 
@@ -257,6 +284,8 @@ The UI shows:
 - tissue mask overlay
 
 - tissue mask binary PNG
+<img width="1842" height="895" alt="image" src="https://github.com/user-attachments/assets/03a68c27-4a82-43c2-b695-bf4e0b0121f5" />
+
 
 ## How to Scale to 10× More Jobs / Users
 To scale the system to support ten times more simultaneous jobs and users, the architecture would need to move beyond the current single-process, in-memory scheduler design. The first major improvement is shifting all heavy computation—such as InstanSeg cell segmentation and tissue mask generation—into distributed task workers using frameworks like Celery, Ray, or Redis Queue. This allows jobs to run in parallel across multiple CPU/GPU machines instead of inside the FastAPI server. In addition, job and workflow state should be persisted in a real database such as PostgreSQL or Redis rather than Python dictionaries so that multiple scheduler instances can coordinate reliably. For storage, output files (masks, overlays, JSON) should be moved to a scalable blob storage service like AWS S3 or Google Cloud Storage, and served via a CDN for faster delivery. On the frontend and backend, load balancers and autoscaling (e.g., Kubernetes Horizontal Pod Autoscaler) can ensure the system grows with demand. Finally, batching tile inference, caching models on GPUs, and parallelizing tile processing further reduce execution time per job. Together, these upgrades allow the system to handle dramatically higher workload while remaining responsive, fault-tolerant, and performant.
