@@ -90,7 +90,7 @@ async def get_job_result(job_id: str, user_id: str = Depends(get_user_id)):
 
 
 # ---------------------------------------------------------
-# Direct image access (optional)
+# Direct image access 
 # ---------------------------------------------------------
 @router.get("/{job_id}/result/mask")
 async def get_mask(job_id: str, user_id: str = Depends(get_user_id)):

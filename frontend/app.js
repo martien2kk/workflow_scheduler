@@ -1,4 +1,3 @@
-// app.js
 // frontend/app.js
 
 async function fetchResult(jobId) {

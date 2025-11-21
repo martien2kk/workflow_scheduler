@@ -30,7 +30,7 @@ app.include_router(user_routes.router)
 print("STATIC FRONTEND DIR:", os.path.abspath("frontend"))
 # Serve the entire frontend folder 
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
-# Optional: redirect "/" to the UI
+
 @app.get("/")
 async def root():
     return FileResponse("frontend/index.html")
