@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>WSI Results Viewer</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f7f7fa;
+        padding: 20px 40px;
+        color: #333;
+      }
+
+      h1 {
+        font-size: 28px;
+        color: #222;
+        margin-bottom: 10px;
+      }
+
+      h2 {
+        margin-top: 40px;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 6px;
+        color: #444;
+      }
+
+      .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px;
+      }
+
+      label {
+        font-weight: bold;
+      }
+
+      input {
+        padding: 8px;
+        font-size: 14px;
+        width: 350px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        margin-right: 8px;
+      }
+
+      button {
+        padding: 8px 14px;
+        font-size: 14px;
+        background: #4a77ff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #3a62d9;
+      }
+
+      #status {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #555;
+      }
+
+      .img-grid {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+
+      .img-box {
+        flex: 1;
+        min-width: 300px;
+      }
+
+      .img-box img {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        background: #fafafa;
+      }
+
+      .label-small {
+        margin-bottom: 4px;
+        font-weight: bold;
+        color: #666;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>WSI Results Viewer</h1>
+
+    <div class="panel">
+      <h2>Load Results</h2>
+
+      <div>
+        <label>Segmentation Job ID:</label><br />
+        <input id="segJobId" placeholder="e.g. job-id-12345" />
+      </div>
+
+      <br />
+
+      <div>
+        <label>Tissue Mask Job ID:</label><br />
+        <input id="tissueJobId" placeholder="e.g. job-id-67890" />
+      </div>
+
+      <br />
+
+      <button onclick="loadResults()">Load Results</button>
+
+      <p id="status"></p>
+    </div>
+
+    <!-- ========================= -->
+    <!--      SEGMENTATION UI     -->
+    <!-- ========================= -->
+
+    <div class="panel">
+      <h2>Cell Segmentation</h2>
+
+      <div class="img-grid">
+        <div class="img-box">
+          <div class="label-small">Overlay:</div>
+          <img id="segOverlay" alt="Segmentation Overlay" />
+        </div>
+
+        <div class="img-box">
+          <div class="label-small">Mask:</div>
+          <img id="segMask" alt="Segmentation Mask" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================= -->
+    <!--       TISSUE MASK UI     -->
+    <!-- ========================= -->
+
+    <div class="panel">
+      <h2>Tissue Mask</h2>
+
+      <div class="img-grid">
+        <div class="img-box">
+          <div class="label-small">Overlay:</div>
+          <img id="tissueOverlay" alt="Tissue Mask Overlay" />
+        </div>
+
+        <div class="img-box">
+          <div class="label-small">Mask:</div>
+          <img id="tissueMask" alt="Tissue Mask Binary" />
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function fetchResult(jobId) {
+        if (!jobId) return null;
+
+        const res = await fetch(`/jobs/${jobId}/result`, {
+          headers: { "X-User-ID": "user-1" },
+        });
+
+        if (!res.ok) return null;
+
+        const json = await res.json();
+        return json.data;
+      }
+
+      async function loadResults() {
+        const segId = document.getElementById("segJobId").value.trim();
+        const tissueId = document.getElementById("tissueJobId").value.trim();
+
+        document.getElementById("status").textContent = "Loading...";
+
+        const seg = await fetchResult(segId);
+        const tissue = await fetchResult(tissueId);
+
+        if (seg) {
+          document.getElementById("segOverlay").src = seg.overlay_png || "";
+          document.getElementById("segMask").src = seg.mask_png || "";
+        }
+
+        if (tissue) {
+          document.getElementById("tissueOverlay").src =
+            tissue.tissue_overlay_png || "";
+          document.getElementById("tissueMask").src =
+            tissue.tissue_mask_png || "";
+        }
+
+        document.getElementById("status").textContent =
+          "Loaded results (if valid job IDs entered).";
+      }
+    </script>
+  </body>
+</html>
