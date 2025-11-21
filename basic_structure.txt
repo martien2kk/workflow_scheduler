@@ -22,10 +22,10 @@ workflow-scheduler/
 │
 ├── static/                         # optional (frontend images/results)
 │
-├── frontend/                       # optional (HTML/JS minimal UI)
+├── frontend/                       
 │   ├── index.html
 │   ├── app.js
-│   └── styles.css
+│   └── styles.css                  # TODO
 │
 ├── tests/                          # optional testing
 │   └── test_scheduler.py
