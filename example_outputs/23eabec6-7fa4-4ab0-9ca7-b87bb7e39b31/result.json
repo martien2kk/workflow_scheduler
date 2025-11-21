@@ -1,0 +1,67 @@
+{
+  "mask_png": "/outputs/23eabec6-7fa4-4ab0-9ca7-b87bb7e39b31/mask.png",
+  "overlay_png": "/outputs/23eabec6-7fa4-4ab0-9ca7-b87bb7e39b31/overlay.png",
+  "type": "cell_segmentation",
+  "wsi_path": "/mnt/c/Users/Keren/workflow_scheduler/data/CMU-2.svs",
+  "pixel_size_um": 0.5,
+  "tiles_processed": 4,
+  "num_cells": 4,
+  "cells": [
+    {
+      "bbox": {
+        "x_min": 974,
+        "y_min": 270,
+        "x_max": 980,
+        "y_max": 276
+      },
+      "area_pixels": 25.0,
+      "tile_index": 1,
+      "tile_origin": [
+        480,
+        0
+      ]
+    },
+    {
+      "bbox": {
+        "x_min": 1072,
+        "y_min": 222,
+        "x_max": 1081,
+        "y_max": 228
+      },
+      "area_pixels": 31.0,
+      "tile_index": 2,
+      "tile_origin": [
+        960,
+        0
+      ]
+    },
+    {
+      "bbox": {
+        "x_min": 974,
+        "y_min": 270,
+        "x_max": 980,
+        "y_max": 276
+      },
+      "area_pixels": 25.0,
+      "tile_index": 2,
+      "tile_origin": [
+        960,
+        0
+      ]
+    },
+    {
+      "bbox": {
+        "x_min": 1904,
+        "y_min": 390,
+        "x_max": 1908,
+        "y_max": 395
+      },
+      "area_pixels": 14.0,
+      "tile_index": 3,
+      "tile_origin": [
+        1440,
+        0
+      ]
+    }
+  ]
+}
