@@ -61,7 +61,7 @@ async def cancel_job_route(job_id: str, user_id: str = Depends(get_user_id)):
 
 
 # ---------------------------------------------------------
-# GET /jobs/{job_id}/result  <-- FIXED
+# GET /jobs/{job_id}/result  
 # ---------------------------------------------------------
 @router.get("/{job_id}/result")
 async def get_job_result(job_id: str, user_id: str = Depends(get_user_id)):
@@ -75,7 +75,7 @@ async def get_job_result(job_id: str, user_id: str = Depends(get_user_id)):
     if job.status not in (JobStatus.SUCCEEDED, JobStatus.FAILED):
         raise HTTPException(status_code=400, detail="Result is only available after job finishes.")
 
-    # FIX: correct filename
+    
     result_path = os.path.join("outputs", job_id, "result.json")
 
     if not os.path.exists(result_path):

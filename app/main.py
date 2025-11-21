@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-
+import os
 from app.routers import workflow_routes, job_routes, user_routes
 from app.scheduler_core import scheduler_loop
 
@@ -27,10 +27,9 @@ app.include_router(user_routes.router)
 # ------------------------------------------------------------
 # 2) STATIC FRONTEND (served at /app)
 # ------------------------------------------------------------
-
-# Serve the entire frontend folder under /app
-app.mount("/app", StaticFiles(directory="frontend", html=True), name="frontend")
-
+print("STATIC FRONTEND DIR:", os.path.abspath("frontend"))
+# Serve the entire frontend folder 
+app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 # Optional: redirect "/" to the UI
 @app.get("/")
 async def root():
@@ -49,10 +48,10 @@ app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
 # ------------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],        # allow UI access
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*", "X-User-ID"],   
 )
 
 
