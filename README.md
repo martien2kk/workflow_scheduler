@@ -89,6 +89,175 @@ workflow-scheduler/
 └── .gitignore                      # ignore env + pycache + outputs
 ```
 
+## Example Run-Through (Using CMU-2.svs Workflow)
+This example demonstrates a complete end-to-end workflow using the publicly available whole-slide image CMU-2.svs, provided by Carnegie Mellon University as part of the OpenSlide test dataset:
+
+🔗 CMU-2.svs download link:
+https://openslide.cs.cmu.edu/download/openslide-testdata/Aperio/CMU-2.svs
+
+In this example, we submit a workflow consisting of two jobs on a single branch:
+
+1.Cell Segmentation (cell_segmentation)
+
+- Runs tile-based nucleus segmentation using the InstanSeg model
+
+- Outputs:
+
+    - overlay.png 
+    - mask.png 
+    - result.json → metadata (cell coordinates, counts, tiles processed, etc.)
+
+2. Tissue Mask Generation (tissue_mask)
+
+- Computes a whole-slide tissue mask using Otsu thresholding on the lowest-resolution pyramid level
+
+- Outputs:
+
+    - tissue_mask.png 
+
+    - tissue_overlay.png 
+
+    - result.json → metadata with accessible PNG paths
+
+Both jobs operate on the same whole-slide image, allowing you to confirm that the scheduler processes dependent tasks correctly and that result files are created inside: `outputs/<job_id>/`
+
+To submit a workflow, navigate to: `http://localhost:8000/docs`
+
+Use this example JSON for **POST /workflows/**:
+```
+{
+  "name": "test-wsi",
+  "branches": [
+    {
+      "branch_id": "A",
+      "jobs": [
+        {
+          "job_type": "cell_segmentation",
+          "params": {
+            "wsi_path": "<WSI-PATH>/workflow_scheduler/data/CMU-2.svs",
+            "tile_size": 512,
+            "overlap": 32,
+            "max_tiles": 4
+          }
+        },
+        {
+          "job_type": "tissue_mask",
+          "params": {
+            "wsi_path": "<WSI-PATH>/workflow_scheduler/data/CMU-2.svs",
+            "tile_size": 1024,
+            "overlap": 64,
+            "max_tiles": 2
+          }
+        }
+      ]
+    }
+  ]
+}
+
+```
+Required header:
+```
+X-User-ID: user-1
+```
+
+Your terminal will show logs like:
+```
+>>> Scheduler loop started
+running_jobs: {...}
+active_users: {...}
+Candidates: [...]
+```
+
+You can view workflow jobs:
+
+`GET /workflows/<workflow_id>`
+
+
+or list all jobs for a workflow:
+
+```GET /jobs/workflow/<workflow_id>```
+
+
+**To check job progress, use the endpoint:**
+
+`GET /jobs/<job_id>`
+
+
+You’ll see status evolve:
+
+- PENDING
+
+- RUNNING
+
+- SUCCEEDED
+
+You will also see:
+
+- tiles_done
+
+- tiles_total
+
+- progress = tiles_done / tiles_total
+
+This satisfies the real-time progress tracking requirement.
+
+**Fetch Results for Each Job**
+
+Once a job has status = SUCCEEDED, do:
+
+`GET /jobs/<job_id>/result`
+
+
+This returns something like:
+```
+{
+  "job_id": "36b8ecaf-3fc2-479b-a1d0-7f4a3b4441aa",
+  "data": {
+    "mask_png": "/outputs/36b8ecaf-3fc2-479b-a1d0-7f4a3b4441aa/mask.png",
+    "overlay_png": "/outputs/36b8ecaf-3fc2-479b-a1d0-7f4a3b4441aa/overlay.png",
+    "pixel_size_um": 0.5,
+    "tiles_processed": 4,
+    "num_cells": 4,
+    "cells": [
+      {
+        "bbox": { ... }
+      }
+    ]
+  }
+}
+```
+
+To view the images directly:
+```
+http://localhost:8000/outputs/<job_id>/overlay.png
+http://localhost:8000/outputs/<job_id>/mask.png
+http://localhost:8000/outputs/<job_id>/tissue_overlay.png
+http://localhost:8000/outputs/<job_id>/tissue_mask.png
+```
+
+**To View Results in the Frontend**
+Open the UI: `http://localhost:8000/`
+
+Enter both job IDs:
+
+- Cell segmentation job ID
+
+- Tissue mask job ID
+
+- Click Load Results.
+
+The UI shows:
+
+- cell segmentation JSON
+
+- segmentation overlay PNG
+
+- segmentation mask PNG
+
+- tissue mask overlay
+
+- tissue mask binary PNG
+
 ## How to Scale to 10× More Jobs / Users
 To scale the system to support ten times more simultaneous jobs and users, the architecture would need to move beyond the current single-process, in-memory scheduler design. The first major improvement is shifting all heavy computation—such as InstanSeg cell segmentation and tissue mask generation—into distributed task workers using frameworks like Celery, Ray, or Redis Queue. This allows jobs to run in parallel across multiple CPU/GPU machines instead of inside the FastAPI server. In addition, job and workflow state should be persisted in a real database such as PostgreSQL or Redis rather than Python dictionaries so that multiple scheduler instances can coordinate reliably. For storage, output files (masks, overlays, JSON) should be moved to a scalable blob storage service like AWS S3 or Google Cloud Storage, and served via a CDN for faster delivery. On the frontend and backend, load balancers and autoscaling (e.g., Kubernetes Horizontal Pod Autoscaler) can ensure the system grows with demand. Finally, batching tile inference, caching models on GPUs, and parallelizing tile processing further reduce execution time per job. Together, these upgrades allow the system to handle dramatically higher workload while remaining responsive, fault-tolerant, and performant.
 
